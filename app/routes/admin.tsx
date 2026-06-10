@@ -22,17 +22,11 @@ export async function action({ request }: Route.ActionArgs) {
   try {
     let imageUrl = "";
 
-    // If an image is selected, upload it directly to R2 bucket
+    // If an image is selected, convert it directly to Base64 text string
     if (imageFile && imageFile.size > 0 && imageFile.name) {
-      const ext = imageFile.name.split(".").pop() || "jpg";
-      const key = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
-
-      // env.IMAGES represents our Cloudflare R2 bucket binding
-      await env.IMAGES.put(key, imageFile.stream(), {
-        httpMetadata: { contentType: imageFile.type },
-      });
-
-      imageUrl = `/api/images/${key}`;
+      const arrayBuffer = await imageFile.arrayBuffer();
+      const base64 = Buffer.from(arrayBuffer).toString("base64");
+      imageUrl = `data:${imageFile.type};base64,${base64}`;
     }
 
     // Insert the blog post metadata and image URL into D1 SQLite database
