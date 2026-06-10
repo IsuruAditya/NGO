@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "react-router-app",
+  "compatibility_date": "2025-04-04",
+  "main": "./workers/app.ts",
+  "vars": {
+    "VALUE_FROM_CLOUDFLARE": "Hello from Cloudflare",
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ngo-db",
+      "database_id": "9e0a8857-98ed-4d8d-ab55-29374a4b3f8b",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "IMAGES",
+      "bucket_name": "ngo-images",
+    },
+  ],
+}
