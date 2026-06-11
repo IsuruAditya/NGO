@@ -1,0 +1,38 @@
+graph TD
+    %% Use Case Diagram (Business View) for EcoAlliance Website
+    
+    %% Actors
+    subgraph Actors [External Actors]
+        V[Visitor / Public User]
+        Vol[Volunteer Applicant]
+        Don[Financial Donor]
+        Adm[Administrator]
+    end
+
+    %% System Boundary
+    subgraph EcoAllianceSystem [EcoAlliance Web System Boundary]
+        UC1(Browse NGO Initiatives & Programs)
+        UC2(Read Impact Stories & News Blog)
+        UC3(Submit General Contact Inquiry)
+        UC4(Apply to Register as Volunteer)
+        UC5(Initiate Donation Checkout)
+        UC6(Verify Donation Payment Status)
+        UC7(Create & Publish Blog Articles)
+        UC8(Review Submissions / Contacts)
+    end
+
+    %% Associations
+    V --> UC1
+    V --> UC2
+    V --> UC3
+    
+    Vol --> UC4
+    
+    Don --> UC5
+    Don --> UC6
+    
+    Adm --> UC7
+    Adm --> UC8
+
+    %% Links between use cases
+    UC5 -.-> |triggers| UC6

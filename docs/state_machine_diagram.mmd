@@ -1,0 +1,35 @@
+stateDiagram-v2
+    %% State Machine Diagram: Donation Record Lifecycle
+    
+    [*] --> Created : Donor fills form & submits
+    
+    state Created {
+        [*] --> Initialized
+        Initialized --> PendingDonation : API generates Stripe checkout URL
+    }
+
+    state PendingDonation {
+        [*] --> AwaitingRedirect
+        AwaitingRedirect --> AwaitingPayment : Redirected to Stripe portal
+    }
+
+    PendingDonation --> Completed : Redirected back & status verified as 'paid'
+    PendingDonation --> Failed : Stripe returns payment error/declines
+    PendingDonation --> Cancelled : User clicks 'Cancel' on Stripe portal
+
+    state Completed {
+        [*] --> StatusSuccess : DB sets status = 'success'
+        StatusSuccess --> UpdateProgramFunds : D1 increments program.raised_amount
+    }
+
+    state Cancelled {
+        [*] --> StatusCancelled : DB keeps status = 'pending' or sets 'cancelled'
+    }
+
+    state Failed {
+        [*] --> StatusFailed : DB sets status = 'failed'
+    }
+
+    Completed --> [*] : Success receipt shown
+    Cancelled --> [*] : User redirected back to form
+    Failed --> [*] : Error message shown

@@ -1,0 +1,53 @@
+erDiagram
+    %% Entity Relationship Diagram (ERD) for D1 SQLite Tables
+    
+    PROGRAMS {
+        int id PK
+        text title
+        text description
+        text image_url
+        real goal_amount
+        real raised_amount
+        datetime created_at
+    }
+
+    VOLUNTEERS {
+        int id PK
+        text name
+        text email
+        text phone
+        text message
+        text status
+        datetime created_at
+    }
+
+    DONATIONS {
+        int id PK
+        text donor_name
+        text donor_email
+        real amount
+        text stripe_session_id UK
+        text status
+        datetime created_at
+    }
+
+    CONTACTS {
+        int id PK
+        text name
+        text email
+        text message
+        datetime created_at
+    }
+
+    BLOG_POSTS {
+        int id PK
+        text title
+        text slug UK
+        text summary
+        text content
+        text image_url
+        datetime published_at
+    }
+
+    %% Logical Relationships
+    DONATIONS }o--|| PROGRAMS : "optional designation (metadata)"

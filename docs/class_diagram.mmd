@@ -1,0 +1,89 @@
+classDiagram
+    %% Class Diagram: Code & Data Structures
+    
+    class Env {
+        +D1Database DB
+        +string VALUE_FROM_CLOUDFLARE
+        +string STRIPE_SECRET_KEY
+    }
+
+    class ApiEnv {
+        +Env Bindings
+    }
+
+    class HonoServer {
+        +get(path, handler)
+        +post(path, handler)
+        +fetch(request, env, ctx)
+    }
+
+    class Program {
+        +int id
+        +string title
+        +string description
+        +string image_url
+        +real goal_amount
+        +real raised_amount
+        +datetime created_at
+    }
+
+    class BlogPost {
+        +int id
+        +string title
+        +string slug
+        +string summary
+        +string content
+        +string image_url
+        +datetime published_at
+    }
+
+    class Volunteer {
+        +int id
+        +string name
+        +string email
+        +string phone
+        +string message
+        +string status
+        +datetime created_at
+    }
+
+    class Donation {
+        +int id
+        +string donor_name
+        +string donor_email
+        +real amount
+        +string stripe_session_id
+        +string status
+        +datetime created_at
+    }
+
+    class Contact {
+        +int id
+        +string name
+        +string email
+        +string message
+        +datetime created_at
+    }
+
+    class ReactRouterPages {
+        +meta(args)
+        +loader(args)
+        +action(args)
+        +default Component()
+    }
+
+    HonoServer ..> ApiEnv : uses
+    ApiEnv --> Env : contains
+    ReactRouterPages ..> Env : accesses D1 via env
+    D1Database --* Program : queries
+    D1Database --* BlogPost : queries
+    D1Database --* Volunteer : writes
+    D1Database --* Donation : writes/updates
+    D1Database --* Contact : writes
+    
+    class D1Database {
+        +prepare(sql)
+        +all()
+        +first()
+        +run()
+    }

@@ -1,0 +1,46 @@
+graph TB
+    %% Architecture Diagram: Highest-Level View
+    
+    subgraph ClientSpace [1. Client Space / User Device]
+        Browser[User Web Browser]
+        StripeCheckout[Stripe Payment Form Interface]
+    end
+
+    subgraph CloudflareHosting [2. Cloudflare Cloud Infrastructure Edge]
+        subgraph StaticCDN [Pages CDN]
+            Styles[Tailwind CSS stylesheets]
+            Scripts[Compiled JS client code]
+        end
+        
+        subgraph WorkersEngine [Workers serverless Runtime]
+            Handler[workers/app.ts Handler]
+            ReactRouterSSR[React Router SSR Engine]
+            HonoAPI[Hono API Backend Routing]
+            
+            Handler -->|routes non-API| ReactRouterSSR
+            Handler -->|routes /api/*| HonoAPI
+        end
+
+        subgraph D1Database [D1 Storage Node]
+            SQLite[(D1 SQLite database)]
+        end
+    end
+
+    subgraph ExternalSaaS [3. Third Party Services]
+        StripeServer[Stripe Billing Servers]
+        Unsplash[Unsplash Images CDN]
+    end
+
+    %% Interaction Paths
+    Browser -->|loads layout & bundles| StaticCDN
+    Browser -->|interacts| Handler
+    ReactRouterSSR -->|fetches dynamic data| SQLite
+    HonoAPI -->|reads/writes| SQLite
+    
+    HonoAPI -->|creates session| StripeServer
+    ReactRouterSSR -->|verifies session| StripeServer
+    Browser -->|redirect payment flow| StripeCheckout
+    StripeCheckout -->|process transaction| StripeServer
+    
+    Browser -.->|loads asset photos| Unsplash
+    SQLite -.->|references photo links| Unsplash

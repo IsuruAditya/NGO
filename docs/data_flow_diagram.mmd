@@ -1,0 +1,36 @@
+graph LR
+    %% Data Flow Diagram (DFD) Level 1
+    
+    %% External Entities
+    Visitor([Public Visitor])
+    Admin([Administrator])
+    StripeSystem([Stripe Gateway])
+
+    %% Processes
+    P1((1.0 Browse & Read Content))
+    P2((2.0 Submit Volunteer Form))
+    P3((3.0 Submit Inquiry))
+    P4((4.0 Process Donation))
+    P5((5.0 Publish Blog Article))
+
+    %% Data Stores
+    D1Database[(D1 Database)]
+
+    %% Data Flows
+    Visitor -->|Request pages / blogs| P1
+    D1Database -->|Reads program & blog data| P1
+    P1 -->|Display programs & blog articles| Visitor
+
+    Visitor -->|Inputs contact form| P3
+    P3 -->|Write inquiry details| D1Database
+
+    Visitor -->|Inputs volunteer form| P2
+    P2 -->|Write applicant details| D1Database
+
+    Visitor -->|Input amount & checkout| P4
+    P4 -->|Create payment session| StripeSystem
+    StripeSystem -->|Redirect user & confirm status| P4
+    P4 -->|Update transaction status & raised fund| D1Database
+
+    Admin -->|Title, slug, summary, Base64 image| P5
+    P5 -->|Insert new blog post| D1Database

@@ -1,0 +1,31 @@
+graph TB
+    %% Deployment Diagram: Physical Server Infrastructure
+    
+    subgraph ClientDevice [Client Computer / Mobile]
+        Browser[User Web Browser]
+    end
+
+    subgraph CloudflareCloud [Cloudflare Edge Infrastructure]
+        subgraph CDN [Pages static hosting CDN]
+            Assets[Static CSS, JS, Fonts]
+        end
+        
+        subgraph WorkersRuntime [Cloudflare Workers v8 Runtime]
+            ServerCode[SSR server-build + Hono API]
+        end
+
+        subgraph D1 [Cloudflare D1 Storage]
+            D1DB[(SQLite Database)]
+        end
+    end
+
+    subgraph StripeCloud [Stripe SaaS Cloud]
+        StripeGateway[Stripe Checkout Servers]
+    end
+
+    %% Network Connections
+    Browser -->|HTTP GET: requests assets| Assets
+    Browser -->|HTTP requests: pages/APIs| ServerCode
+    ServerCode -->|SQL queries: local socket| D1DB
+    ServerCode -->|HTTPS requests: outbound API| StripeGateway
+    Browser -->|secure redirect| StripeGateway

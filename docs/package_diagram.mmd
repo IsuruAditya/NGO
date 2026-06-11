@@ -1,0 +1,46 @@
+graph TB
+    %% Package Diagram: Code Folders & Dependencies
+    
+    subgraph RootPackage [Project Workspace Root]
+        
+        subgraph WorkersPackage [workers/]
+            AppEntry[workers/app.ts]
+        end
+
+        subgraph AppPackage [app/]
+            AppCss[app/app.css]
+            RoutesConfig[app/routes.ts]
+            RootLayout[app/root.tsx]
+            
+            subgraph RoutesFolder [app/routes/]
+                Home[home.tsx]
+                About[about.tsx]
+                Programs[programs.tsx]
+                Volunteer[volunteer.tsx]
+                Donate[donate.tsx]
+                Contact[contact.tsx]
+                BlogIndex[blog.index.tsx]
+                BlogDetail[blog.detail.tsx]
+                Admin[admin.tsx]
+            end
+
+            subgraph ApiFolder [app/api/]
+                HonoApi[app/api/index.ts]
+            end
+        end
+
+        subgraph ConfigPackage [Root Configs]
+            Wrangler[wrangler.jsonc]
+            PackageJson[package.json]
+            SchemaSql[schema.sql]
+        end
+    end
+
+    %% Dependencies
+    AppEntry -->|imports| HonoApi
+    AppEntry -->|delegates to server-build| RoutesConfig
+    RoutesConfig -->|references| RoutesFolder
+    RoutesFolder -->|extends| RootLayout
+    RootLayout -->|imports| AppCss
+    HonoApi -.->|reads schema structure| SchemaSql
+    AppEntry -.->|configured by| Wrangler

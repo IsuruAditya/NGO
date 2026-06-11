@@ -1,0 +1,35 @@
+graph LR
+    %% Component Diagram: System Modules
+    
+    subgraph ClientComponent [Client Layer / UI]
+        Root[root.tsx Layout]
+        Pages[React Pages / Routes]
+        Tailwind[Tailwind CSS styles]
+    end
+
+    subgraph ServerComponent [Server Layer / Compute]
+        WorkerEntry[workers/app.ts Handler]
+        HonoRouter[app/api/index.ts API Router]
+        RR_Build[Vite SSR Server Build]
+    end
+
+    subgraph PersistenceComponent [Data Persistence]
+        SQLiteD1[D1 SQLite Database]
+    end
+
+    subgraph ExternalServices [External Integrations]
+        StripeAPI[Stripe Checkout API]
+    end
+
+    %% Dependency Arrows
+    Root --> Pages
+    Pages --> Tailwind
+    
+    WorkerEntry -->|routes non-API| RR_Build
+    WorkerEntry -->|routes /api/*| HonoRouter
+    
+    HonoRouter -->|queries & writes| SQLiteD1
+    HonoRouter -->|creates session| StripeAPI
+    
+    RR_Build -->|loads dynamic data| SQLiteD1
+    RR_Build -->|verifies status on redirect| StripeAPI

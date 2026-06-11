@@ -1,0 +1,35 @@
+sequenceDiagram
+    %% Sequence Diagram: Object Communication Flow for Donations
+    autonumber
+    
+    actor Donor as Donor (Browser)
+    participant Worker as Cloudflare Worker Entry
+    participant Router as Hono API (/api/donate/checkout)
+    participant Stripe as Stripe Gateway API
+    participant D1 as D1 Database (SQLite)
+    participant Page as React Router Loader (/donate)
+
+    Donor->>Worker: POST /donate (Form details)
+    Worker->>Router: Forward to checkout handler
+    Router->>Stripe: create session (amount, metadata)
+    Stripe-->>Router: return session URL & ID
+    Router->>D1: INSERT INTO donations (status = 'pending')
+    D1-->>Router: confirm write
+    Router-->>Worker: return Checkout URL
+    Worker-->>Donor: Redirect to Stripe Portal
+    
+    Note over Donor, Stripe: Donor completes secure card verification
+    
+    Stripe-->>Donor: Redirect to /donate?success=true&session_id={ID}
+    Donor->>Worker: GET /donate?success=true&session_id={ID}
+    Worker->>Page: Trigger Route Loader
+    Page->>Stripe: retrieve session status by ID
+    Stripe-->>Page: return status = 'paid'
+    Page->>D1: SELECT status FROM donations WHERE session_id
+    D1-->>Page: returns status = 'pending'
+    Page->>D1: UPDATE donations SET status = 'success'
+    D1-->>Page: confirm update
+    Page->>D1: UPDATE programs SET raised_amount = raised_amount + amount
+    D1-->>Page: confirm update
+    Page-->>Worker: Compile styled success page HTML
+    Worker-->>Donor: Render "Thank You" screen

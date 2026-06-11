@@ -1,0 +1,44 @@
+graph TB
+    %% Swimlane Activity Diagram for Donation Processing Flow
+    
+    %% Swimlane: Donor
+    subgraph DonorSwimlane [Donor Action Lane]
+        Start([Start: Want to Donate]) --> Select[Select Designation & Amount]
+        Select --> ClickDonate[Click Checkout]
+        RedirectStripe[Redirect to Stripe Portal] --> EnterCard[Enter Card Details & Pay]
+        EnterCard --> RedirectBack[Redirected Back to NGO Site]
+    end
+
+    %% Swimlane: Frontend (React Router)
+    subgraph FrontendSwimlane [Frontend / React Router]
+        ClickDonate --> TriggerAction[Execute Server Action]
+        ParseRedirect[Parse Redirect URL params] --> VerifyLoader[Run Loader Verification]
+        VerifyLoader --> RenderSuccess[Render Thank You Page]
+        RenderSuccess --> End([End: Process Complete])
+    end
+
+    %% Swimlane: API Backend (Hono)
+    subgraph BackendSwimlane [API Backend / Hono]
+        TriggerAction --> CallStripe[Call Stripe REST API]
+        SavePending[Log 'pending' transaction in D1]
+        CallStripe --> SavePending
+        SavePending --> ReturnURL[Return Checkout Session URL]
+        ReturnURL --> RedirectStripe
+    end
+
+    %% Swimlane: D1 Database
+    subgraph D1Swimlane [D1 SQLite Database]
+        SavePending -.-> D1Write[Write: Insert Donation Record]
+        VerifyLoader -.-> D1Query[Query: Check Donation Status]
+        D1Query -.-> D1Update[Write: Update Status to success & Increment Raised Fund]
+    end
+
+    %% Swimlane: Stripe Gateway
+    subgraph StripeSwimlane [Stripe Secure Cloud]
+        CallStripe --> StripeVerify[Verify details & Make Session]
+        StripeVerify --> ReturnURL
+        EnterCard --> StripeProcess[Authorize Charge]
+        StripeProcess --> RedirectBack
+        VerifyLoader --> StripeRetrieve[Retrieve Session status]
+        StripeRetrieve --> D1Update
+    end
